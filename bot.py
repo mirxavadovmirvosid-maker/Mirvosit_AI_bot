@@ -8,7 +8,7 @@ from flask import Flask
 BOT_TOKEN = "8917394328:AAHYp1VAZpMLltPbOEceE3-GsmX0OCh4uwY"
 
 # SIZNING GEMINI API KALITINGIZ
-GEMINI_KEY = "AIzaSyB62MjBDMf1SlqVoe52RIywT8Ktiq7h0"
+GEMINI_KEY = "AIzaSyB62MjBDMf1SB1iQVoe52RIywT8KtiQ7h0"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 ai_client = genai.Client(api_key=GEMINI_KEY)
