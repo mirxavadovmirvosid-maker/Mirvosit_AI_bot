@@ -1,49 +1,41 @@
 import os
-from threading import Thread
 import telebot
 from google import genai
-from flask import Flask
+from dotenv import load_dotenv
 
-# SIZNING TELEGRAM BOT TOKENINGIZ
-BOT_TOKEN = "8917394328:AAHYp1VAZpMLltPbOEceE3-GsmX0OCh4uwY"
+# .env faylini tizimga mutlaqo toza yuklaymiz
+load_dotenv()
 
-# SIZNING GEMINI API KALITINGIZ
-GEMINI_KEY = "AIzaSyB62MjBDMf1SB1iQVoe52RIywT8KtiQ7h0"
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
+# Yangi obyektlarni yaratish
 bot = telebot.TeleBot(BOT_TOKEN)
-ai_client = genai.Client(api_key=GEMINI_KEY)
+ai = genai.Client(api_key=GEMINI_KEY)
 
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "Bot yoniq!"
-
-def run():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-
-@bot.message_handler(commands=['start', 'help'])
+# /start buyrug'i kelganda
+@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Salom! Men Mirvosit AI botiman. Menga istalgan savolingizni bering.")
+    bot.reply_to(message, "Salom! Mirvosid AI botingiz 0 dan, eng yangi tizimda muvaffaqiyatli ishga tushdi! Menga istalgan savolingizni bering.")
 
+# Har qanday matnli xabar kelganda
 @bot.message_handler(func=lambda message: True)
-def echo_all(message):
+def handle_message(message):
     try:
-        user_text = message.text
-        # Kengaytirilgan va tezkor yangi model versiyasi
-        response = ai_client.models.generate_content(
+        print(f"Kelgan xabar: {message.text}")
+        
+        # Google'ning eng yangi tekin modeli
+        response = ai.models.generate_content(
             model='gemini-2.5-flash',
-            contents=user_text,
+            contents=message.text,
         )
+        
         bot.reply_to(message, response.text)
+        
     except Exception as e:
-        print(f"Xatolik: {e}")
-        bot.reply_to(message, "Xatolik yuz berdi. Birozdan so'ng qayta urinib ko'ring.")
+        print(f"Xatolik yuz berdi: {e}")
+        bot.reply_to(message, f"Xatolik yuz berdi. Tizim xabari: {e}")
 
 if __name__=="__main__":
-    # Serverni alohida oqimda yoqamiz
-    t = Thread(target=run)
-    t.start()
-    
-    print("🤖 Telegram AI Bot muvaffaqiyatli ishga tushdi...")
+    print("🤖 Barcha tizimlar tozalandi. Yangi bot eshitishni boshladi...")
     bot.infinity_polling()
